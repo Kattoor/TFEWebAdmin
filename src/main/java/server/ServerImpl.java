@@ -21,7 +21,7 @@ public class ServerImpl implements Server {
         while (bytesRead == -1 && counter++ < 3) {
             bytesRead = is.read(buffer);
             try {
-                Thread.sleep(100);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
