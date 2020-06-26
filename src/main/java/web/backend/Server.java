@@ -32,6 +32,8 @@ public class Server extends NanoHTTPD {
 
         int port = 1113;
 
+        System.out.println(session.getUri());
+
         if (session.getUri().contains("/api/verifytoken")) {
             String token = parameters.get("token");
 
@@ -46,13 +48,17 @@ public class Server extends NanoHTTPD {
             String username = parameters.get("username");
             String password = parameters.get("password");
 
+            System.out.println("starting connection");
             ServerImpl si = new ServerImpl();
             boolean success = si.connect(ip, port, username, password);
+            System.out.println("connected: " + success);
             si.closeConnection();
 
             String token = generateAuthenticationKey();
             if (success)
                 authentication.put(token, new ServerCredentials(ip, username, password));
+
+            System.out.println(token);
 
             Response response = newFixedLengthResponse(Response.Status.OK, "text", success ? token : "false");
             response.addHeader("Access-Control-Allow-Origin", "*");

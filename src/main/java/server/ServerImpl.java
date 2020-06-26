@@ -45,6 +45,7 @@ public class ServerImpl implements Server {
     @Override
     public boolean connect(String ip, int port, String username, String password) {
         try {
+            System.out.println("inside connect 1");
             this.socket = new Socket(ip, port);
 
             /*
@@ -53,22 +54,27 @@ public class ServerImpl implements Server {
             Receive packet 5 (FromMS_AcceptConnection)
             Receive packet 4 (FromMS_SyncData)
             */
-
+            System.out.println("inside connect 2");
             Packet packet = receivePacket();
+            System.out.println("inside connect 3");
 //            printPacket("Received: ", packet);
 
             Packet logInPacket = new Packet(0, "{\"secret\": \"4bf3fd6a0c4f4ac570903654c28fb2bb\",\"userName\": \"" + username + "\", \"password\":\"" + password + "\"}");
             logInPacket.send(socket);
+            System.out.println("inside connect 4");
 //            printPacket("Sent: ", logInPacket);
 
             packet = receivePacket();
+            System.out.println("inside connect 5");
 //            printPacket("Received: ", packet);
 
             packet = receivePacket();
+            System.out.println("inside connect 6");
 //            printPacket("Received: ", packet);
 
             return true;
         } catch (Exception e) {
+            System.out.println("inside connect ?");
             //e.printStackTrace();
             return false;
         }
