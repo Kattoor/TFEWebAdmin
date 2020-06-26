@@ -1,0 +1,128 @@
+[
+  {
+    "id": "GUN1",
+    "allow": true,
+    "name": "M4",
+    "categories": "Primary Weapons|Medic"
+  },
+  {
+    "id": "GUN2",
+    "allow": true,
+    "name": "M9",
+    "categories": "Secondary Weapons"
+  },
+  {
+    "id": "GUN4",
+    "allow": true,
+    "name": "50 Cal",
+    "categories": "Primary Weapons|Sniper"
+  },
+  {
+    "id": "GUN5",
+    "allow": true,
+    "name": "AK-47",
+    "categories": "Primary Weapons|Grenadier"
+  },
+  {
+    "id": "GUN6",
+    "allow": true,
+    "name": "F90(G)",
+    "categories": "Primary Weapons|Grenadier"
+  },
+  {
+    "id": "GUN7",
+    "allow": true,
+    "name": "M21",
+    "categories": "Primary Weapons|Sniper"
+  },
+  {
+    "id": "GUN8",
+    "allow": true,
+    "name": "Classic .45",
+    "categories": "Secondary Weapons"
+  },
+  {
+    "id": "GUN9",
+    "allow": true,
+    "name": "M60",
+    "categories": "Primary Weapons|Gunner"
+  },
+  {
+    "id": "GUN10",
+    "allow": true,
+    "name": "L96",
+    "categories": "Primary Weapons|Sniper"
+  },
+  {
+    "id": "GUN11",
+    "allow": true,
+    "name": "M4-M203",
+    "categories": "Primary Weapons|Grenadier"
+  },
+  {
+    "id": "GUN12",
+    "allow": true,
+    "name": "M16-A4",
+    "categories": "Primary Weapons|Grenadier"
+  },
+  {
+    "id": "GUN13",
+    "allow": true,
+    "name": "MK18 MOD 0",
+    "categories": "Primary Weapons|Medic"
+  },
+  {
+    "id": "GUN14",
+    "allow": true,
+    "name": "RPG7",
+    "categories": "Primary Weapons|Medic"
+  },
+  {
+    "id": "GUN15",
+    "allow": true,
+    "name": "Claymore",
+    "categories": "Primary Weapons|Gadgets"
+  },
+  {
+    "id": "GUN16",
+    "allow": true,
+    "name": "MP5",
+    "categories": "Primary Weapons|Medic"
+  },
+  {
+    "id": "GUN17",
+    "allow": true,
+    "name": "RPD",
+    "categories": "Primary Weapons|Gunner"
+  },
+  {
+    "id": "GUN21",
+    "allow": true,
+    "name": "M203",
+    "categories": "Gadgets"
+  },
+  {
+    "id": "GRENADE",
+    "allow": true,
+    "name": "Grenade",
+    "categories": "Utilities"
+  },
+  {
+    "id": "FLASHBANG",
+    "allow": true,
+    "name": "Flashbang",
+    "categories": "Utilities"
+  },
+  {
+    "id": "SMOKE",
+    "allow": true,
+    "name": "Smoke",
+    "categories": "Utilities"
+  },
+  {
+    "id": "SYRINGE",
+    "allow": true,
+    "name": "Syringe",
+    "categories": "Gadgets"
+  }
+]
