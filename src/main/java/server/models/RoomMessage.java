@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoomMessage {
-    private int frequency;
-    private boolean bInOrder;
-    private boolean bInChat;
-    private List<String> messages;
+    private final int frequency;
+    private final boolean bInOrder;
+    private final boolean bInChat;
+    private final List<String> messages;
 
     public RoomMessage() {
         frequency = 20;

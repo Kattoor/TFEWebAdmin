@@ -33,10 +33,6 @@ public class Packet {
         this.data = data;
     }
 
-    public Packet() {
-
-    }
-
     public Packet(int action, String data) {
         this.action = action;
         this.data = data;

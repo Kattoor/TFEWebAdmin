@@ -48,21 +48,23 @@ public class Server extends NanoHTTPD {
             String username = parameters.get("username");
             String password = parameters.get("password");
 
-            System.out.println("starting connection");
             ServerImpl si = new ServerImpl();
             boolean success = si.connect(ip, port, username, password);
-            System.out.println("connected: " + success);
             si.closeConnection();
 
-            String token = generateAuthenticationKey();
-            if (success)
+            Response response;
+
+            if (success) {
+                String token = generateAuthenticationKey();
                 authentication.put(token, new ServerCredentials(ip, username, password));
+                response = newFixedLengthResponse(Response.Status.OK, "text", token);
+                response.addHeader("Access-Control-Allow-Headers", "token");
+            } else {
+                response = newFixedLengthResponse(Response.Status.OK, "text", "false");
+            }
 
-            System.out.println(token);
-
-            Response response = newFixedLengthResponse(Response.Status.OK, "text", success ? token : "false");
             response.addHeader("Access-Control-Allow-Origin", "*");
-            response.addHeader("Access-Control-Allow-Headers", "token");
+
             return response;
         }
 

@@ -3,31 +3,27 @@ package server.models;
 import java.util.List;
 
 public class CreateRoom {
-    private String map;
-    private int matchType;
-    private int gameLength;
-    private int maxPlayer;
-    private int maxScore;
-    private int warmupTime;
-    private int spawnProtectionTime;
-    private int injuryTime;
-    private int timeBetweenMatches;
-    private int goalTakenTime;
-    private int pspTakingTime;
-    private String region;
-    private String roomName;
-    private int numOfBots;
-    private boolean bSaveChatLog;
-    private boolean bEnableWordCensorship;
-    private List<WeaponRule> weaponRules;
-    private List<String> mapRotation;
-    private boolean bAllowSpectator;
-    private RoomMessage roomMessage;
-    private String password;
-
-    public CreateRoom() {
-
-    }
+    private final String map;
+    private final int matchType;
+    private final int gameLength;
+    private final int maxPlayer;
+    private final int maxScore;
+    private final int warmupTime;
+    private final int spawnProtectionTime;
+    private final int injuryTime;
+    private final int timeBetweenMatches;
+    private final int goalTakenTime;
+    private final int pspTakingTime;
+    private final String region;
+    private final String roomName;
+    private final int numOfBots;
+    private final boolean bSaveChatLog;
+    private final boolean bEnableWordCensorship;
+    private final List<WeaponRule> weaponRules;
+    private final List<String> mapRotation;
+    private final boolean bAllowSpectator;
+    private final RoomMessage roomMessage;
+    private final String password;
 
     public CreateRoom(String map, int matchType, String roomName, List<WeaponRule> weaponRules, List<String> mapRotation, RoomMessage roomMessage) {
         this.map = map;

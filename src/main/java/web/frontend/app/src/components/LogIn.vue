@@ -8,7 +8,7 @@
                 <div class="md-body-1">Version 0.1.0</div>
             </div>
 
-            <div class="form">
+            <div>
                 <md-field>
                     <label>IP Address</label>
                     <md-input v-model="login.ip" autofocus></md-input>
@@ -25,14 +25,14 @@
                 </md-field>
 
                 <div>
-                    <md-checkbox v-model="login.discordBotIntegration" disabled>
+                    <md-checkbox style="margin-bottom: 0;" v-model="login.discordBotIntegration" disabled>
                         Enable Discord bot integration
                     </md-checkbox>
                     <md-tooltip md-direction="bottom">Not implemented yet, sorry!</md-tooltip>
                 </div>
             </div>
 
-            <div class="actions md-layout md-alignment-center-space-between">
+            <div class="md-layout md-alignment-center-space-between" style="margin-top: 50px; margin-bottom: 20px;">
                 <div/>
                 <md-button class="md-raised md-primary" @click="auth">Log in</md-button>
                 <div/>
@@ -87,8 +87,7 @@
                             localStorage.token = data;
                             localStorage.username = this.login.username;
                             this.$emit('loggedIn');
-                        } else
-                            console.log('sad');
+                        }
                     });
 
                 this.loading = true;

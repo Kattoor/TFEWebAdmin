@@ -1,15 +1,15 @@
 <template>
-    <div class="roww">
+    <div>
         <h1 class="md-title">Players</h1>
 
         <div class="md-layout">
-            <div class="md-layout-item">
+            <div class="md-layout-item" style="height: 100%;">
                 <b>Task Force Elite: {{blue.length}}</b>
                 <br/>
                 <p v-for="player in blue" :key="player.displayName">{{player.displayName}}</p>
             </div>
 
-            <div class="md-layout-item">
+            <div class="md-layout-item" style="height: 100%;">
                 <b>Red Spear: {{red.length}}</b>
                 <br/>
                 <p v-for="player in red" :key="player.displayName">{{player.displayName}}</p>

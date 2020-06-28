@@ -55,5 +55,6 @@
         right: 0;
         left: 0;
         z-index: 0;
+        background-size: cover;
     }
 </style>

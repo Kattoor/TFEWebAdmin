@@ -1,10 +1,10 @@
 package server.models;
 
 public class WeaponRule {
-    private String id;
-    private boolean allow;
-    private transient String name;
-    private transient String categories;
+    private final String id;
+    private final boolean allow;
+    private final transient String name;
+    private final transient String categories;
 
     public WeaponRule(String id, boolean allow, String name, String categories) {
         this.id = id;
