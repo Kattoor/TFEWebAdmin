@@ -3,7 +3,7 @@
         <md-content class="md-elevation-3">
 
             <div class="title">
-                <img src="../assets/img2.png">
+                <img src="../../assets/img2.png">
                 <div class="md-title">Task Force Elite - Web Admin</div>
                 <div class="md-body-1">Version 0.1.0</div>
             </div>

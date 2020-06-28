@@ -1,16 +1,45 @@
 <template>
-    <div>
-        <div class="background"/>
-        <WebAdminView></WebAdminView>
+    <div style="overflow-x: hidden">
+        <div style="width: 100vw;">
+            <md-toolbar v-if="loggedIn" class="md-primary">
+                <h3 class="md-title" style="flex: 1">{{username}}</h3>
+                <md-button @click="logOut()">LOG OUT</md-button>
+            </md-toolbar>
+            <div>
+                <LogIn id="login" v-if="!loggedIn" v-on:loggedIn="onLoggedIn"></LogIn>
+                <RoomsView id="roomsView" v-if="loggedIn"></RoomsView>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-    import WebAdminView from "./components/webadmin/WebAdminView";
+    import LogIn from "./LogIn";
+    import RoomsView from "./RoomsView";
 
     export default {
-        name: "App",
-        components: {WebAdminView},
+        name: "WebAdminView",
+        components: {LogIn, RoomsView},
+        data() {
+            return {
+                loggedIn: false,
+            };
+        },
+        methods: {
+            onLoggedIn() {
+                this.loggedIn = true;
+            },
+            logOut() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                this.loggedIn = false;
+            }
+        },
+        computed: {
+            username() {
+                return localStorage.username;
+            }
+        }
     };
 </script>
 
