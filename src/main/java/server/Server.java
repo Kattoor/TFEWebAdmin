@@ -11,6 +11,7 @@ public interface Server {
     void restartRoom(String roomId);
     void createRoom(CreateRoom data);
     String getMapsAndModes();
+    void kickPlayer(String playerId);
 
     void closeConnection();
 }

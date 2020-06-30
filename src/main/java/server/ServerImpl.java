@@ -115,6 +115,16 @@ public class ServerImpl implements Server {
     }
 
     @Override
+    public void kickPlayer(String playerId) {
+        try {
+            new Packet(1, "{\"playerID\": \"" +  playerId + "\"}").send(socket);
+            receivePacket();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void closeConnection() {
         try {
             this.socket.close();

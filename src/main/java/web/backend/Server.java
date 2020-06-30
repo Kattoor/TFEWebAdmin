@@ -101,8 +101,28 @@ public class Server extends NanoHTTPD {
             return response;
         }
 
-        if (session.getUri().contains("/api/getrooms")) {
+        if (session.getUri().contains("/api/kickplayer")) {
+            String token = session.getHeaders().get("token");
+            ServerCredentials creds = token != null ? authentication.get(token) : null;
 
+            if (creds != null) {
+                String playerId = parameters.get("playerId");
+
+                System.out.println("Kicking player " + playerId);
+
+                ServerImpl si = new ServerImpl();
+                si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
+                si.kickPlayer(playerId);
+                si.closeConnection();
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "token");
+            return response;
+        }
+
+        if (session.getUri().contains("/api/getrooms")) {
             String roomsInfo = "{}";
 
             String token = session.getHeaders().get("token");
