@@ -1,17 +1,79 @@
 <template>
-    <div>
+    <v-app>
+        <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp" app>
+            <v-list dense>
+                <template v-for="item in items">
+                    <v-divider v-if="item.divider" :key="item.text" dark class="my-4"></v-divider>
+                    <v-list-item v-else :key="item.text" link @click="item.click()">
+                        <v-list-item-action>
+                            <v-icon>{{ item.icon }}</v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>{{ item.text }}</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </template>
+            </v-list>
+        </v-navigation-drawer>
+
+        <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue" dark>
+            <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+            <v-toolbar-title style="width: 300px" class="ml-0 pl-4">
+                <span class="hidden-sm-and-down">Task Force Elite</span>
+            </v-toolbar-title>
+        </v-app-bar>
+
         <div class="background"/>
-        <WebAdminView></WebAdminView>
-    </div>
+        <v-main>
+            <WebAdminView v-if="showWebAdmin"></WebAdminView>
+            <ServerListView v-if="showServerList"></ServerListView>
+        </v-main>
+    </v-app>
 </template>
 
 <script>
     import WebAdminView from "./components/webadmin/WebAdminView";
+    import ServerListView from "./components/webadmin/ServerListView";
 
     export default {
-        name: "App",
-        components: {WebAdminView},
-    };
+        name: 'App',
+        components: {WebAdminView, ServerListView},
+        props: {
+            source: String,
+        },
+        data() {
+            return {
+                drawer: null,
+                showServerList: false,
+                showWebAdmin: true,
+                items: [
+                    {
+                        icon: 'mdi-gamepad-square', text: 'Server list', click: () => {
+                            this.showServerList = true;
+                            this.showWebAdmin = false;
+                        }
+                    },
+                    {
+                        icon: 'mdi-server', text: 'Web admin', click: () => {
+                            this.showServerList = false;
+                            this.showWebAdmin = true;
+                        }
+                    },
+                    {divider: true},
+                    {
+                        icon: 'mdi-forum',
+                        text: 'Forum',
+                        click: () => window.open('https://www.taskforceelite.com', '_blank')
+                    },
+                    {
+                        icon: 'mdi-discord',
+                        text: 'Discord',
+                        click: () => window.open('https://discord.com/invite/d6HhVwq', '_blank')
+                    }
+                ],
+            }
+        }
+    }
 </script>
 
 <style lang="scss">

@@ -1,22 +1,19 @@
 <template>
-    <div class="roww">
-        <h1 class="md-title">Map</h1>
-
-        <div class="md-layout">
-            <div class="md-layout-item">
-                <p>Current Map: <b>{{current}}</b></p>
+    <div>
+        <div style="display: flex; flex-direction: row;">
+            <div style="height: 100%; width: 100%; color: black;">
+                <div class="md-layout-item">
+                    <p>Current Map: <b>{{current}}</b></p>
+                </div>
             </div>
 
-            <div class="md-layout-item">
-                <md-field style="width: 50%;">
-                    <label>Change Map</label>
-                    <md-select v-model="selectedMap" name="Change Map" id="combobox">
-                        <md-option v-for="map in rotation" :key="map" :value="map">{{map}}</md-option>
-                    </md-select>
-                </md-field>
-                <md-button class="md-raised md-primary" :disabled="changeMapDisabled" @click="changeMapClick()">Change
-                    Map
-                </md-button>
+            <div style="height: 100%; width: 100%; color: black;">
+                <v-combobox
+                        v-model="selectedMap"
+                        :items="rotation"
+                        label="Change Map"
+                        dense outlined></v-combobox>
+                <v-btn small color="primary" :disabled="changeMapDisabled" @click="changeMapClick">Change Map</v-btn>
             </div>
         </div>
     </div>

@@ -6,5 +6,8 @@ module.exports = {
                 args[0].title = 'TFE Web Admin';
                 return args;
             });
-    }
+    },
+    "transpileDependencies": [
+        "vuetify"
+    ]
 }

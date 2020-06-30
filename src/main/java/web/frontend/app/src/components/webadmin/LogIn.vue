@@ -1,48 +1,30 @@
 <template>
-    <div class="centered-container">
-        <md-content class="md-elevation-3">
 
-            <div class="title">
-                <img src="../../assets/img2.png">
-                <div class="md-title">Task Force Elite - Web Admin</div>
-                <div class="md-body-1">Version 0.1.0</div>
-            </div>
+    <v-card width="400" class="mx-auto mt-5" outlined :loading="loading">
+        <v-card-title class="pb-0">
+            <div class="overline mb-4">LOGIN</div>
+        </v-card-title>
+        <v-card-text>
+            <v-text-field label="IP Address" prepend-icon="mdi-ip-network" v-model="login.ip"/>
+            <v-text-field label="Username" prepend-icon="mdi-account-circle" v-model="login.username"/>
+            <v-text-field
+                    :type="showPassword ? 'text' : 'password'"
+                    label="Password"
+                    prepend-icon="mdi-lock"
+                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    @click:append="showPassword = !showPassword"
+                    v-model="login.password"/>
 
-            <div>
-                <md-field>
-                    <label>IP Address</label>
-                    <md-input v-model="login.ip" autofocus></md-input>
-                </md-field>
+            <v-checkbox
+                    v-model="login.discordBotIntegration"
+                    label="Enable Discord bot integration"
+                    disabled></v-checkbox>
+        </v-card-text>
 
-                <md-field>
-                    <label>Username</label>
-                    <md-input v-model="login.username"></md-input>
-                </md-field>
-
-                <md-field md-has-password>
-                    <label>Password</label>
-                    <md-input v-model="login.password" type="password"></md-input>
-                </md-field>
-
-                <div>
-                    <md-checkbox style="margin-bottom: 0;" v-model="login.discordBotIntegration" disabled>
-                        Enable Discord bot integration
-                    </md-checkbox>
-                    <md-tooltip md-direction="bottom">Not implemented yet, sorry!</md-tooltip>
-                </div>
-            </div>
-
-            <div class="md-layout md-alignment-center-space-between" style="margin-top: 50px; margin-bottom: 20px;">
-                <div/>
-                <md-button class="md-raised md-primary" @click="auth">Log in</md-button>
-                <div/>
-            </div>
-
-            <div class="loading-overlay" v-if="loading">
-                <md-progress-spinner md-mode="indeterminate" :md-stroke="2"></md-progress-spinner>
-            </div>
-        </md-content>
-    </div>
+        <v-card-actions>
+            <v-btn color="info" @click="logIn()">Login</v-btn>
+        </v-card-actions>
+    </v-card>
 </template>
 
 <script>
@@ -50,6 +32,7 @@
         name: "LogIn",
         data() {
             return {
+                showPassword: false,
                 loading: false,
                 login: {
                     ip: "",
@@ -76,7 +59,7 @@
             }
         },
         methods: {
-            auth() {
+            logIn() {
                 fetch(this.serverIp + '/api/canlogin?ip=' + this.login.ip +
                     '&username=' + this.login.username +
                     '&password=' + this.login.password)
@@ -97,54 +80,5 @@
 </script>
 
 <style lang="scss" scoped>
-    .centered-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        height: 100vh;
-    }
 
-    .title {
-        text-align: center;
-        margin-bottom: 30px;
-
-        img {
-            margin-bottom: 16px;
-            max-width: 120px;
-            padding: 10px;
-        }
-    }
-
-    .actions {
-        .md-button {
-            margin: 0;
-        }
-    }
-
-    .form {
-        margin-bottom: 60px;
-    }
-
-    .md-content {
-        z-index: 1;
-        padding: 40px;
-        width: 100%;
-        max-width: 400px;
-        position: relative;
-    }
-
-    .loading-overlay {
-        z-index: 10;
-        top: 0;
-        left: 0;
-        right: 0;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.9);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 </style>
