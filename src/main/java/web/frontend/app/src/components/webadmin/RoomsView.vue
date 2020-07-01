@@ -1,6 +1,19 @@
 <template>
     <div>
-        <div style="margin-top: 50px;" v-if="!showRoomCreationView">
+        <div style="margin-top: 50px;" v-if="!showRoomCreationView && !showAccountSettingsView">
+            <v-card width="60%" class="mx-auto mt-5">
+                <v-card-title class="pb-0">
+                    <div class="overline mb-4">ACCOUNT</div>
+                    <v-btn icon color="blue" @click="showAccountSettingsView = !showAccountSettingsView"
+                           style="margin-bottom: 16px;">
+                        <v-icon>mdi-account-cog</v-icon>
+                    </v-btn>
+                </v-card-title>
+                <v-card-text style="color: black;">
+                    <p>Logged in as: {{username}}</p>
+                </v-card-text>
+            </v-card>
+
             <v-card width="60%" class="mx-auto mt-5" :loading="loading">
                 <v-card-title class="pb-0">
                     <div class="overline mb-4">ROOMS</div>
@@ -101,18 +114,14 @@
                     <ExtraDataView :selected="selected"/>
                 </v-card-text>
             </v-card>
-
-            <v-card v-if="someRoomIsSelected" width="60%" class="mx-auto mt-5">
-                <v-card-title class="pb-0">
-                    <div class="overline mb-4">Create Room</div>
-                </v-card-title>
-                <v-card-text>
-                </v-card-text>
-            </v-card>
         </div>
 
         <div v-if="showRoomCreationView">
             <CreateMapView @created="showRoomCreationView = false" @cancel="showRoomCreationView = false"/>
+        </div>
+
+        <div v-if="showAccountSettingsView">
+            <AccountSettingsView/>
         </div>
     </div>
 </template>
@@ -124,20 +133,26 @@
     import ExtraDataView from "./ExtraDataView";
     import CreateMapView from "./CreateMapView";
     import BlackListView from "./BlackListView";
+    import AccountSettingsView from "./AccountSettingsView";
 
     export default {
         name: "HelloWorld",
-        components: {BlackListView, PlayersView, MapView, ExtraDataView, CreateMapView},
+        components: {
+            AccountSettingsView, BlackListView, PlayersView, MapView, ExtraDataView, CreateMapView
+        },
         created() {
             this.load();
         },
         data() {
             return {
+                username: localStorage.username,
+
                 selectedRow: null,
 
                 rooms: [],
                 loading: false,
                 showRoomCreationView: false,
+                showAccountSettingsView: false,
 
                 headers: [
                     {text: 'Name', value: 'roomName'},
@@ -206,10 +221,7 @@
                 else
                     this.selected.redTeam = this.selected.redTeam.filter(p => p.pid !== playerId);
 
-                console.log(JSON.stringify(this.selected.blackList));
                 this.selected.blackList.push({pid: playerId, displayName});
-                console.log(JSON.stringify(this.selected.blackList));
-                console.log(this.selected.blackList);
             }
         }
     };

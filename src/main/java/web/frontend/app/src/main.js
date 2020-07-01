@@ -8,7 +8,7 @@ Vue.mixin({
         return {
             get serverIp() {
                 //return 'http://161.35.95.41';
-                return 'http://192.168.1.57';
+                return 'http://localhost';
             }
         }
     }

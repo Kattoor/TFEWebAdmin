@@ -25,11 +25,6 @@
             onLoggedIn() {
                 this.loggedIn = true;
             }
-        },
-        computed: {
-            username() {
-                return localStorage.username;
-            }
         }
     };
 </script>

@@ -3,6 +3,7 @@ package web.backend;
 import com.google.gson.Gson;
 import fi.iki.elonen.NanoHTTPD;
 import server.ServerImpl;
+import server.models.CreateAdmin;
 import server.models.CreateRoom;
 
 import java.io.ByteArrayInputStream;
@@ -298,6 +299,78 @@ public class Server extends NanoHTTPD {
             Response response = newFixedLengthResponse(Response.Status.OK, "application/json", "");
             response.addHeader("Access-Control-Allow-Origin", "*");
             response.addHeader("Access-Control-Allow-Headers", "token");
+            return response;
+        }
+
+        if (session.getUri().contains("/api/getadminlist")) {
+            String token = session.getHeaders().get("token");
+            ServerCredentials creds = token != null ? authentication.get(token) : null;
+
+            String adminList = "";
+
+            if (creds != null) {
+                ServerImpl si = new ServerImpl();
+                si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
+
+                adminList = si.getAdminList();
+                si.closeConnection();
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "application/json", adminList);
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "token");
+            return response;
+        }
+
+        if (session.getMethod() == Method.POST && session.getUri().contains("/api/createadmin")) {
+            try {
+                String token = session.getHeaders().get("token");
+                ServerCredentials creds = token != null ? authentication.get(token) : null;
+                if (creds != null) {
+                    int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+                    String in = new String(session.getInputStream().readNBytes(contentLength));
+
+                    CreateAdmin cr = new Gson().fromJson(in, CreateAdmin.class);
+
+                    ServerImpl si = new ServerImpl();
+
+                    si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
+                    si.createAdmin(cr);
+                    si.closeConnection();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
+            return response;
+        }
+
+        if (session.getMethod() == Method.POST && session.getUri().contains("/api/deleteadmin")) {
+            try {
+                String token = session.getHeaders().get("token");
+                ServerCredentials creds = token != null ? authentication.get(token) : null;
+                if (creds != null) {
+                    int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+                    String in = new String(session.getInputStream().readNBytes(contentLength));
+
+                    CreateAdmin cr = new Gson().fromJson(in, CreateAdmin.class);
+
+                    ServerImpl si = new ServerImpl();
+
+                    si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
+                    si.deleteAdmin(cr);
+                    si.closeConnection();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
             return response;
         }
 

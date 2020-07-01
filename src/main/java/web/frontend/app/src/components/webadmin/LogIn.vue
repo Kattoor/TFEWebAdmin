@@ -1,6 +1,6 @@
 <template>
 
-    <v-card width="400" class="mx-auto mt-5" outlined :loading="loading">
+    <v-card width="400" class="mx-auto mt-5" style="margin-top: 0 !important;" outlined :loading="loading">
         <v-card-title class="pb-0">
             <div class="overline mb-4">LOGIN</div>
         </v-card-title>

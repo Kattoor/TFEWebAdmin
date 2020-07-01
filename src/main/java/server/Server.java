@@ -1,5 +1,6 @@
 package server;
 
+import server.models.CreateAdmin;
 import server.models.CreateRoom;
 
 public interface Server {
@@ -13,6 +14,9 @@ public interface Server {
     String getMapsAndModes();
     void kickPlayer(String playerId);
     void removePlayerFromBlackList(String roomId, String playerId);
+    String getAdminList();
+    void createAdmin(CreateAdmin data);
+    void deleteAdmin(CreateAdmin data);
 
     void closeConnection();
 }

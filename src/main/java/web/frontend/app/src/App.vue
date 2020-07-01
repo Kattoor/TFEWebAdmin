@@ -2,9 +2,10 @@
     <v-app>
         <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp" app>
             <v-list dense>
-                <template v-for="item in items">
+                <template v-for="(item, key) in items">
                     <v-divider v-if="item.divider" :key="item.text" dark class="my-4"></v-divider>
-                    <v-list-item v-else :key="item.text" link @click="item.click()">
+                    <v-list-item v-else :key="item.text" link @click="item.click(key)"
+                                 :class="key === selectedRow ? 'bb' : ''">
                         <v-list-item-action>
                             <v-icon>{{ item.icon }}</v-icon>
                         </v-list-item-action>
@@ -43,18 +44,21 @@
         },
         data() {
             return {
+                selectedRow: 1,
                 drawer: null,
                 showServerList: false,
                 showWebAdmin: true,
                 items: [
                     {
-                        icon: 'mdi-gamepad-square', text: 'Server list', click: () => {
+                        icon: 'mdi-gamepad-square', text: 'Server list', click: key => {
+                            this.selectedRow = key;
                             this.showServerList = true;
                             this.showWebAdmin = false;
                         }
                     },
                     {
-                        icon: 'mdi-server', text: 'Web admin', click: () => {
+                        icon: 'mdi-server', text: 'Web admin', click: key => {
+                            this.selectedRow = key;
                             this.showServerList = false;
                             this.showWebAdmin = true;
                         }
@@ -88,5 +92,20 @@
         left: 0;
         z-index: 0;
         background-size: cover;
+    }
+</style>
+
+<style lang="scss" scoped>
+    .white-text {
+        color: white;
+        font-weight: bold;
+    }
+
+    tr :hover {
+        cursor: pointer;
+    }
+
+    .bb {
+        border-right: 5px solid #116aff;
     }
 </style>

@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import server.models.CreateAdmin;
 import server.models.CreateRoom;
 
 import java.io.IOException;
@@ -128,6 +129,38 @@ public class ServerImpl implements Server {
     public void removePlayerFromBlackList(String roomId, String playerId) {
         try {
             new Packet(20, "{\"room\": \"" + roomId + "\", \"pid\": \"" + playerId + "\"}").send(socket);
+            receivePacket();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String getAdminList() {
+        try {
+            new Packet(21, "").send(socket);
+            Packet received = receivePacket();
+            return received.getData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    @Override
+    public void createAdmin(CreateAdmin data) {
+        try {
+            new Packet(22, "{\"editMode\": 0, \"data\": " + new Gson().toJson(data) + "}").send(socket);
+            receivePacket();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteAdmin(CreateAdmin data) {
+        try {
+            new Packet(22, "{\"editMode\": 2, \"data\": " + new Gson().toJson(data) + "}").send(socket);
             receivePacket();
         } catch (IOException e) {
             e.printStackTrace();
