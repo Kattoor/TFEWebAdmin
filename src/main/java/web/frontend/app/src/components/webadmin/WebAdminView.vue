@@ -1,6 +1,5 @@
 <template>
     <div style="width: 100%;" class="fill-height">
-
         <v-container v-if="!loggedIn" class="fill-height" fluid>
             <v-row align="center" justify="center">
                 <LogIn id="login" v-on:loggedIn="onLoggedIn"></LogIn>

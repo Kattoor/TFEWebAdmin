@@ -66,7 +66,20 @@
                     <div class="overline mb-4">Players</div>
                 </v-card-title>
                 <v-card-text>
-                    <PlayersView :red="selected.redTeam" :blue="selected.blueTeam"/>
+                    <PlayersView :red="selected.redTeam" :blue="selected.blueTeam"
+                                 @kickedRedPlayer="(playerId, displayName) => kickPlayer('red', playerId, displayName)"
+                                 @kickedBluePlayer="(playerId, displayName) => kickPlayer('blue', playerId, displayName)"/>
+                </v-card-text>
+            </v-card>
+
+
+            <v-card v-if="someRoomIsSelected" width="60%" class="mx-auto mt-5">
+                <v-card-title class="pb-0">
+                    <div class="overline mb-4">Blacklist</div>
+                </v-card-title>
+                <v-card-text>
+                    <BlackListView :roomId="selected.roomID" :blackList="selected.blackList"
+                                   @removedFromBlackList="playerId => selected.blackList = selected.blackList.filter(p => p.pid !== playerId)"/>
                 </v-card-text>
             </v-card>
 
@@ -110,10 +123,11 @@
     import MapView from "./MapView";
     import ExtraDataView from "./ExtraDataView";
     import CreateMapView from "./CreateMapView";
+    import BlackListView from "./BlackListView";
 
     export default {
         name: "HelloWorld",
-        components: {PlayersView, MapView, ExtraDataView, CreateMapView},
+        components: {BlackListView, PlayersView, MapView, ExtraDataView, CreateMapView},
         created() {
             this.load();
         },
@@ -185,6 +199,17 @@
             },
             createRoom() {
                 this.showRoomCreationView = true;
+            },
+            kickPlayer(team, playerId, displayName) {
+                if (team === 'blue')
+                    this.selected.blueTeam = this.selected.blueTeam.filter(p => p.pid !== playerId);
+                else
+                    this.selected.redTeam = this.selected.redTeam.filter(p => p.pid !== playerId);
+
+                console.log(JSON.stringify(this.selected.blackList));
+                this.selected.blackList.push({pid: playerId, displayName});
+                console.log(JSON.stringify(this.selected.blackList));
+                console.log(this.selected.blackList);
             }
         }
     };

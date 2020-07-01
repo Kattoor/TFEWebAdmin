@@ -5,7 +5,7 @@
             <v-hover v-slot:default="{ hover }" v-for="player in blue" :key="player.displayName">
                 <div style="display: flex; align-items: center; height: 36px;">
                     <p style="margin: 0 5px;">{{player.displayName}}</p>
-                    <v-btn v-if="hover" icon color="red" @click="kickPlayer(player.pid)">
+                    <v-btn v-if="hover" icon color="red" @click="kickPlayer('blue', player.pid, player.displayName)">
                         <v-icon>mdi-account-remove</v-icon>
                     </v-btn>
                 </div>
@@ -17,7 +17,7 @@
             <v-hover v-slot:default="{ hover }" v-for="player in red" :key="player.displayName">
                 <div style="display: flex; align-items: center; height: 36px;">
                     <p style="margin: 0 5px;">{{player.displayName}}</p>
-                    <v-btn v-if="hover" icon color="red" @click="kickPlayer(player.pid)">
+                    <v-btn v-if="hover" icon color="red" @click="kickPlayer('red', player.pid, player.displayName)">
                         <v-icon>mdi-account-remove</v-icon>
                     </v-btn>
                 </div>
@@ -31,14 +31,16 @@
         name: "PlayersView",
         props: ['red', 'blue'],
         methods: {
-            kickPlayer(playerId) {
+            kickPlayer(team, playerId, playerName) {
                 fetch(this.serverIp + '/api/kickplayer?playerId=' + playerId, {
                     headers: {"token": localStorage.token}
                 })
                     .then(data => data.text())
                     .then(() => {
-                        this.red = this.red.filter(p => p.pid !== playerId);
-                        this.blue = this.blue.filter(p => p.pid !== playerId);
+                        if (team === 'blue')
+                            this.$emit('kickedBluePlayer', playerId, playerName);
+                        else
+                            this.$emit('kickedRedPlayer', playerId, playerName);
                     });
             }
         }

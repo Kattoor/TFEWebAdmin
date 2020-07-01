@@ -12,6 +12,7 @@ public interface Server {
     void createRoom(CreateRoom data);
     String getMapsAndModes();
     void kickPlayer(String playerId);
+    void removePlayerFromBlackList(String roomId, String playerId);
 
     void closeConnection();
 }

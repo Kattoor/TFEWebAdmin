@@ -8,6 +8,10 @@ import server.models.CreateRoom;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,10 +34,43 @@ public class Server extends NanoHTTPD {
         String msg = "";
         Map<String, String> parameters = session.getParms();
 
-        int port = 1113;
-
         System.out.println(session.getUri());
 
+        Response response = route(session, parameters);
+        if (response != null)
+            return response;
+
+        try {
+            String uri = session.getUri().equals("/") ? "/index.html" : session.getUri();
+
+            Path path = Paths.get("src/main/java/web/frontend/app/dist/" + uri);
+            if (session.getUri().endsWith(".ico")) {
+                byte[] bytes = Files.readAllBytes(path);
+                return newFixedLengthResponse(Response.Status.OK, "image/x-icon", new ByteArrayInputStream(bytes), bytes.length);
+            } else if (session.getUri().endsWith(".png")) {
+                byte[] bytes = Files.readAllBytes(path);
+                return newFixedLengthResponse(Response.Status.OK, "image/png", new ByteArrayInputStream(bytes), bytes.length);
+            } else {
+                if (Files.exists(path))
+                    msg += Files.readString(path);
+                else
+                    System.out.println("Couldn't find " + session.getUri());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String mimeType = "text/html";
+        if (session.getUri().endsWith(".js"))
+            mimeType = "text/javascript";
+        else if (session.getUri().equals("/App"))
+            mimeType = "text/javascript";
+        else if (session.getUri().endsWith(".css"))
+            mimeType = "text/css";
+        return newFixedLengthResponse(Response.Status.OK, mimeType, msg);
+    }
+
+    private Response route(IHTTPSession session, Map<String, String> parameters) {
         if (session.getUri().contains("/api/verifytoken")) {
             String token = parameters.get("token");
 
@@ -43,6 +80,7 @@ public class Server extends NanoHTTPD {
             return response;
         }
 
+        int port = 1113;
         if (session.getUri().contains("/api/canlogin")) {
             String ip = parameters.get("ip");
             String username = parameters.get("username");
@@ -98,6 +136,50 @@ public class Server extends NanoHTTPD {
             Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
             response.addHeader("Access-Control-Allow-Origin", "*");
             response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
+            return response;
+        }
+
+        if (session.getUri().contains("/api/serverlist/allplayercount")) {
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1?appid=1148810"))
+                    .build();
+
+            String body;
+
+            try {
+                body = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
+
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                body = "error";
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "text", body);
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "token");
+            return response;
+        }
+
+        if (session.getUri().contains("/api/removefromblacklist")) {
+            String token = session.getHeaders().get("token");
+            ServerCredentials creds = token != null ? authentication.get(token) : null;
+
+            if (creds != null) {
+                String roomId = parameters.get("roomId");
+                String playerId = parameters.get("playerId");
+
+                System.out.println("Removing player [" + playerId + "] from blacklist for room [" + roomId + "]");
+
+                ServerImpl si = new ServerImpl();
+                si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
+                si.removePlayerFromBlackList(roomId, playerId);
+                si.closeConnection();
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "token");
             return response;
         }
 
@@ -219,34 +301,7 @@ public class Server extends NanoHTTPD {
             return response;
         }
 
-        try {
-            String uri = session.getUri().equals("/") ? "/index.html" : session.getUri();
-
-            Path path = Paths.get("src/main/java/web/frontend/app/dist/" + uri);
-            if (session.getUri().endsWith(".ico")) {
-                byte[] bytes = Files.readAllBytes(path);
-                return newFixedLengthResponse(Response.Status.OK, "image/x-icon", new ByteArrayInputStream(bytes), bytes.length);
-            } else if (session.getUri().endsWith(".png")) {
-                byte[] bytes = Files.readAllBytes(path);
-                return newFixedLengthResponse(Response.Status.OK, "image/png", new ByteArrayInputStream(bytes), bytes.length);
-            } else {
-                if (Files.exists(path))
-                    msg += Files.readString(path);
-                else
-                    System.out.println("Couldn't find " + session.getUri());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String mimeType = "text/html";
-        if (session.getUri().endsWith(".js"))
-            mimeType = "text/javascript";
-        else if (session.getUri().equals("/App"))
-            mimeType = "text/javascript";
-        else if (session.getUri().endsWith(".css"))
-            mimeType = "text/css";
-        return newFixedLengthResponse(Response.Status.OK, mimeType, msg);
+        return null;
     }
 
     private String generateAuthenticationKey() {
