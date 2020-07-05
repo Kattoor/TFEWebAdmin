@@ -2,7 +2,7 @@ package server.models;
 
 public class CreateAdmin {
     private final String userName;
-    private final String password;
+    private String password;
     private final String name;
     private final String description;
     private final int role;
@@ -13,5 +13,17 @@ public class CreateAdmin {
         this.name = name;
         this.description = description;
         this.role = role;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

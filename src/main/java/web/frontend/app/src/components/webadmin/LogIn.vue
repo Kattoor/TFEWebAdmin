@@ -17,8 +17,7 @@
 
             <v-checkbox
                     v-model="login.discordBotIntegration"
-                    label="Enable Discord bot integration"
-                    disabled></v-checkbox>
+                    label="Enable Discord bot integration"></v-checkbox>
         </v-card-text>
 
         <v-card-actions>
@@ -38,7 +37,7 @@
                     ip: "",
                     username: "",
                     password: "",
-                    discordBotIntegration: false
+                    discordBotIntegration: true
                 }
             };
         },
@@ -69,11 +68,63 @@
                         if (data !== 'false') {
                             localStorage.token = data;
                             localStorage.username = this.login.username;
-                            this.$emit('loggedIn');
+
+                            if (this.login.discordBotIntegration)
+                                this.integrateDiscord();
+                            else
+                                this.$emit('loggedIn');
                         }
                     });
 
                 this.loading = true;
+            },
+            alreadyIntegratedDiscord(cb) {
+                fetch(this.serverIp + '/api/getadminlist', {
+                    headers: {"token": localStorage.token}
+                })
+                    .then(data => data.json())
+                    .then(data => {
+                        cb(data.admins.filter(acc => acc.userName === 'DiscordBot').length > 0);
+                    });
+            },
+            sendIntegrationRequest() {
+                const newAccount = {
+                    userName: 'DiscordBot',
+                    name: 'DiscordBot',
+                    password: '',
+                    description: 'Account with basic permissions for Discord bot integration',
+                    role: 'Basic'
+                };
+
+                const body = JSON.stringify(Object.assign({}, newAccount, {'role': ['Admin', 'Moderator', 'Basic'].indexOf(newAccount.role)}));
+
+                const requestOptions = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "content-length": body.length,
+                        "token": localStorage.token
+                    },
+                    body: body
+                };
+
+                fetch(this.serverIp + '/api/creatediscordaccount', requestOptions)
+                    .then(response => response.text())
+                    .then(password => {
+                        console.log('Created account DiscordBot with password ' + password)
+                        this.$emit('loggedIn');
+                    });
+            },
+            integrateDiscord() {
+                this.alreadyIntegratedDiscord(alreadyIntegrated => {
+                    if (alreadyIntegrated) {
+                        console.log('Already integrated!');
+                        this.$emit('loggedIn');
+                    } else {
+                        this.sendIntegrationRequest();
+                    }
+                });
+
             }
         }
     };

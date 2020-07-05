@@ -5,7 +5,7 @@
                 <LogIn id="login" v-on:loggedIn="onLoggedIn"></LogIn>
             </v-row>
         </v-container>
-        <RoomsView id="roomsView" v-if="loggedIn"></RoomsView>
+        <RoomsView id="roomsView" v-if="loggedIn" @loggedOut="loggedIn = false"></RoomsView>
     </div>
 </template>
 

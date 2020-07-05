@@ -3,10 +3,14 @@
         <div style="margin-top: 50px;" v-if="!showRoomCreationView && !showAccountSettingsView">
             <v-card width="60%" class="mx-auto mt-5">
                 <v-card-title class="pb-0">
-                    <div class="overline mb-4">ACCOUNT</div>
-                    <v-btn icon color="blue" @click="showAccountSettingsView = !showAccountSettingsView"
+                        <div class="overline mb-4">ACCOUNT</div>
+                        <v-btn icon color="blue" @click="showAccountSettingsView = !showAccountSettingsView"
+                               style="margin-bottom: 16px;">
+                            <v-icon>mdi-account-cog</v-icon>
+                        </v-btn>
+                    <v-btn icon color="red" @click="logout()"
                            style="margin-bottom: 16px;">
-                        <v-icon>mdi-account-cog</v-icon>
+                        <v-icon>mdi-logout</v-icon>
                     </v-btn>
                 </v-card-title>
                 <v-card-text style="color: black;">
@@ -170,6 +174,11 @@
             }
         },
         methods: {
+            logout() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                this.$emit('loggedOut');
+            },
             setSelectedRow(key) {
                 this.selectedRow = this.selectedRow === key ? null : key;
             },

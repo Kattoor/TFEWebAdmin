@@ -13,10 +13,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +48,10 @@ public class Server extends NanoHTTPD {
         try {
             String uri = session.getUri().equals("/") ? "/index.html" : session.getUri();
 
-            Path path = Paths.get("src/main/java/web/frontend/app/dist/" + uri);
+            Path path = Paths.get("./dist/" + uri);
+
+            System.out.println(path.toString());
+
             if (session.getUri().endsWith(".ico")) {
                 byte[] bytes = Files.readAllBytes(path);
                 return newFixedLengthResponse(Response.Status.OK, "image/x-icon", new ByteArrayInputStream(bytes), bytes.length);
@@ -348,6 +355,47 @@ public class Server extends NanoHTTPD {
             return response;
         }
 
+        if (session.getMethod() == Method.POST && session.getUri().contains("/api/creatediscordaccount")) {
+            String responseText = "";
+
+            try {
+                String token = session.getHeaders().get("token");
+                ServerCredentials creds = token != null ? authentication.get(token) : null;
+                if (creds != null) {
+                    int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+                    String in = new String(session.getInputStream().readNBytes(contentLength));
+
+                    CreateAdmin cr = new Gson().fromJson(in, CreateAdmin.class);
+                    String password = generateAuthenticationKey();
+                    cr.setPassword(password);
+                    responseText = password;
+
+                    ServerImpl si = new ServerImpl();
+
+                    si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
+                    si.createAdmin(cr);
+
+                    final Path path = Paths.get("discord-credentials");
+                    Files.write(path,
+                            Collections.singletonList(cr.getUserName() + ";" + cr.getPassword() + ";" + creds.getIp()),
+                            StandardCharsets.UTF_8,
+                            Files.exists(path)
+                                    ? StandardOpenOption.APPEND
+                                    : StandardOpenOption.CREATE);
+
+                    si.closeConnection();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                responseText = "";
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "text", responseText);
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
+            return response;
+        }
+
         if (session.getMethod() == Method.POST && session.getUri().contains("/api/deleteadmin")) {
             try {
                 String token = session.getHeaders().get("token");
@@ -357,7 +405,6 @@ public class Server extends NanoHTTPD {
                     String in = new String(session.getInputStream().readNBytes(contentLength));
 
                     CreateAdmin cr = new Gson().fromJson(in, CreateAdmin.class);
-
                     ServerImpl si = new ServerImpl();
 
                     si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
@@ -383,5 +430,4 @@ public class Server extends NanoHTTPD {
         random.nextBytes(bytes);
         return new BigInteger(1, bytes).toString();
     }
-
 }
