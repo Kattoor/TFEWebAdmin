@@ -19,10 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Server extends NanoHTTPD {
 
@@ -116,6 +114,30 @@ public class Server extends NanoHTTPD {
 
         if (session.getMethod() == Method.OPTIONS) {
             Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
+            return response;
+        }
+
+        if (session.getUri().contains("/api/getplayercounts")) {
+            final Path path = Paths.get("./playercount");
+            List<String> lastLines = new ArrayList<>();
+            if (Files.exists(path)) {
+                try {
+                    List<String> lines = Files.readAllLines(path);
+                    lastLines = lines.stream()
+                            .skip(lines.size() - 25)
+                            .map(line -> {
+                                String[] parts = line.split(";");
+                                return "{\"time\":\"" + parts[0] + "\",\"count\":\"" + parts[1] + "\"}";
+                            })
+                            .collect(Collectors.toList());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "application/json", "[" + String.join(",", lastLines) + "]");
             response.addHeader("Access-Control-Allow-Origin", "*");
             response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
             return response;

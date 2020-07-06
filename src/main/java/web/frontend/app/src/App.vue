@@ -4,15 +4,13 @@
             <v-list dense>
                 <template v-for="(item, key) in items">
                     <v-divider v-if="item.divider" :key="item.text" dark class="my-4"></v-divider>
-                    <v-list-item v-else :key="item.text" link @click="item.click(key)"
-                                 :class="key === selectedRow ? 'bb' : ''">
-                        <v-list-item-action>
-                            <v-icon>{{ item.icon }}</v-icon>
-                        </v-list-item-action>
-                        <v-list-item-content>
-                            <v-list-item-title>{{ item.text }}</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
+                    <router-link v-if="item.routeTo" :to="item.routeTo" tag="div" v-bind:key="key">
+                        <NavigationDrawerItem :item="item" @clicked="item.click(key)"
+                                              :is-selected-row="key === selectedRow"></NavigationDrawerItem>
+                    </router-link>
+                    <NavigationDrawerItem v-if="!item.routeTo && !item.divider" :item="item"
+                                          :is-selected-row="key === selectedRow" @clicked="item.click(key)"
+                                          v-bind:key="key"></NavigationDrawerItem>
                 </template>
             </v-list>
         </v-navigation-drawer>
@@ -26,38 +24,42 @@
 
         <div class="background"/>
         <v-main>
-            <WebAdminView v-if="showWebAdmin"></WebAdminView>
-            <ServerListView v-if="showServerList"></ServerListView>
+            <router-view/>
         </v-main>
     </v-app>
 </template>
 
 <script>
-    import WebAdminView from "./components/webadmin/WebAdminView";
-    import ServerListView from "./components/webadmin/ServerListView";
+    import NavigationDrawerItem from "./NavigationDrawerItem";
 
     export default {
         name: 'App',
-        components: {WebAdminView, ServerListView},
+        components: {NavigationDrawerItem},
         props: {
             source: String,
         },
         data() {
             return {
-                selectedRow: 1,
+                selectedRow: 0,
                 drawer: null,
                 showServerList: false,
                 showWebAdmin: true,
                 items: [
                     {
-                        icon: 'mdi-gamepad-square', text: 'Server list', click: key => {
+                        icon: 'mdi-gamepad-square',
+                        text: 'Server list',
+                        routeTo: '/serverlist',
+                        click: key => {
                             this.selectedRow = key;
                             this.showServerList = true;
                             this.showWebAdmin = false;
                         }
                     },
                     {
-                        icon: 'mdi-server', text: 'Web admin', click: key => {
+                        icon: 'mdi-server',
+                        text: 'Web admin',
+                        routeTo: '/webadmin',
+                        click: key => {
                             this.selectedRow = key;
                             this.showServerList = false;
                             this.showWebAdmin = true;
