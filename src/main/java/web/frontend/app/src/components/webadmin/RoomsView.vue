@@ -3,11 +3,15 @@
         <div style="margin-top: 50px;" v-if="!showRoomCreationView && !showAccountSettingsView">
             <v-card width="60%" class="mx-auto mt-5">
                 <v-card-title class="pb-0">
-                        <div class="overline mb-4">ACCOUNT</div>
-                        <v-btn icon color="blue" @click="showAccountSettingsView = !showAccountSettingsView"
+                    <div class="overline mb-4">ACCOUNT</div>
+                    <router-link to="/webadmin/account" tag="div">
+                        <!--@click="showAccountSettingsView = !showAccountSettingsView"-->
+                        <v-btn icon color="blue"
                                style="margin-bottom: 16px;">
                             <v-icon>mdi-account-cog</v-icon>
                         </v-btn>
+                    </router-link>
+
                     <v-btn icon color="red" @click="logout()"
                            style="margin-bottom: 16px;">
                         <v-icon>mdi-logout</v-icon>
@@ -124,9 +128,9 @@
             <CreateMapView @created="showRoomCreationView = false" @cancel="showRoomCreationView = false"/>
         </div>
 
-        <div v-if="showAccountSettingsView">
+<!--        <div v-if="showAccountSettingsView">
             <AccountSettingsView/>
-        </div>
+        </div>-->
     </div>
 </template>
 
@@ -137,12 +141,11 @@
     import ExtraDataView from "./ExtraDataView";
     import CreateMapView from "./CreateMapView";
     import BlackListView from "./BlackListView";
-    import AccountSettingsView from "./AccountSettingsView";
 
     export default {
         name: "HelloWorld",
         components: {
-            AccountSettingsView, BlackListView, PlayersView, MapView, ExtraDataView, CreateMapView
+            BlackListView, PlayersView, MapView, ExtraDataView, CreateMapView
         },
         created() {
             this.load();

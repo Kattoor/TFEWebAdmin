@@ -24,6 +24,18 @@
 
         <div class="background"/>
         <v-main>
+            <v-breadcrumbs :items="breadCrumbs">
+                <template v-slot:item="{ item }">
+                    <router-link :to="item.href" tag="div">
+                        <v-breadcrumbs-item :href="item.href" :disabled="item.disabled">
+                            {{ item.text }}
+                        </v-breadcrumbs-item>
+                    </router-link>
+                </template>
+                <template v-slot:divider>
+                    <v-icon>mdi-chevron-right</v-icon>
+                </template>
+            </v-breadcrumbs>
             <router-view/>
         </v-main>
     </v-app>
@@ -35,6 +47,22 @@
     export default {
         name: 'App',
         components: {NavigationDrawerItem},
+        created() {
+            window.routeChangeListeners.push(to => {
+                this.breadCrumbs = this.getRoutes(to);
+            });
+        },
+        methods: {
+            getRoutes(to) {
+                if (to === '/') to = '/serverlist';
+
+                return to.substr(1).split('/').map((text, index) => ({
+                    text: text[0].toUpperCase() + text.slice(1),
+                    href: '/' + to.substr(1).split('/').slice(0, index + 1).join('/'),
+                    disabled: false
+                }));
+            }
+        },
         props: {
             source: String,
         },
@@ -44,6 +72,7 @@
                 drawer: null,
                 showServerList: false,
                 showWebAdmin: true,
+                breadCrumbs: this.getRoutes(window.currentRoute),
                 items: [
                     {
                         icon: 'mdi-gamepad-square',

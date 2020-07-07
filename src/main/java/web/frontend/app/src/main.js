@@ -20,14 +20,22 @@ Vue.mixin({
 const routes = [
     {path: '/', component: ServerListView},
     {path: '/webadmin', component: WebAdminView},
-    {path: '/serverlist', component: ServerListView}
+    {path: '/serverlist', component: ServerListView},
+    {path: '/webadmin/account', component: AccountSettingsView}
 ]
 
-const router = new VueRouter({routes})
+const router = new VueRouter({routes});
+
+window.routeChangeListeners = [];
+router.onReady(() => window.currentRoute = router.currentRoute.path);
+router.afterEach((to) =>
+    window.routeChangeListeners.forEach(listener => listener(to.path)));
+window.router = router;
 
 import vuetify from './plugins/vuetify';
 import ServerListView from "./components/serverlist/ServerListView";
 import WebAdminView from "./components/webadmin/WebAdminView";
+import AccountSettingsView from "./components/webadmin/AccountSettingsView";
 
 new Vue({
     router,

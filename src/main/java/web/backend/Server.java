@@ -126,7 +126,7 @@ public class Server extends NanoHTTPD {
                 try {
                     List<String> lines = Files.readAllLines(path);
                     lastLines = lines.stream()
-                            .skip(lines.size() - 25)
+                            .skip(lines.size() <= 25 ? 0 : lines.size() - 25)
                             .map(line -> {
                                 String[] parts = line.split(";");
                                 return "{\"time\":\"" + parts[0] + "\",\"count\":\"" + parts[1] + "\"}";
