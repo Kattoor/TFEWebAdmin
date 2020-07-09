@@ -37,7 +37,7 @@ public class Server extends NanoHTTPD {
         String msg = "";
         Map<String, String> parameters = session.getParms();
 
-        System.out.println(session.getUri());
+        System.out.println("Requested URL: " + session.getUri());
 
         Response response = route(session, parameters);
         if (response != null)
@@ -77,6 +77,13 @@ public class Server extends NanoHTTPD {
     }
 
     private Response route(IHTTPSession session, Map<String, String> parameters) {
+        if (session.getMethod() == Method.OPTIONS) {
+            Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
+            return response;
+        }
+
         if (session.getUri().contains("/api/verifytoken")) {
             String token = parameters.get("token");
 
@@ -91,6 +98,7 @@ public class Server extends NanoHTTPD {
             String ip = parameters.get("ip");
             String username = parameters.get("username");
             String password = parameters.get("password");
+            System.out.println(" > Attempting to log in with ip [" + ip + "], username[" + username + "], password [" + password + "]");
 
             ServerImpl si = new ServerImpl();
             boolean success = si.connect(ip, port, username, password);
@@ -99,23 +107,18 @@ public class Server extends NanoHTTPD {
             Response response;
 
             if (success) {
+                System.out.println(" > Successfully logged in");
                 String token = generateAuthenticationKey();
                 authentication.put(token, new ServerCredentials(ip, username, password));
                 response = newFixedLengthResponse(Response.Status.OK, "text", token);
                 response.addHeader("Access-Control-Allow-Headers", "token");
             } else {
+                System.out.println(" > Failed to log in");
                 response = newFixedLengthResponse(Response.Status.OK, "text", "false");
             }
 
             response.addHeader("Access-Control-Allow-Origin", "*");
 
-            return response;
-        }
-
-        if (session.getMethod() == Method.OPTIONS) {
-            Response response = newFixedLengthResponse(Response.Status.OK, "text", "");
-            response.addHeader("Access-Control-Allow-Origin", "*");
-            response.addHeader("Access-Control-Allow-Headers", "Content-Type, content-length, token");
             return response;
         }
 
@@ -238,17 +241,31 @@ public class Server extends NanoHTTPD {
             String roomsInfo = "{}";
 
             String token = session.getHeaders().get("token");
+            System.out.println(" > Attempting to fetch rooms for token [" + token + "]");
+
             ServerCredentials creds = token != null ? authentication.get(token) : null;
 
             if (creds != null) {
+                System.out.println(" > Token resolves to user [" + creds.getUsername() + "]");
+
                 ServerImpl si = new ServerImpl();
 
-                si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
-                roomsInfo = si.getRoomsInfo();
+                System.out.println(" > Connecting to server");
+                boolean successfullyConnected = si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
+                if (successfullyConnected) {
+                    System.out.println(" > Successfully connected");
+                    System.out.println(" > Fetching room info");
+                    roomsInfo = si.getRoomsInfo();
+                    System.out.println(" > Fetched room info");
+                    System.out.println(roomsInfo);
+                } else {
+                    System.out.println(" > Failed to connect");
+                }
                 si.closeConnection();
-            }
+            } else
+                System.out.println("No user found for token");
 
-            Response response = newFixedLengthResponse(Response.Status.OK, "application/json", String.valueOf(roomsInfo));
+            Response response = newFixedLengthResponse(Response.Status.OK, "application/json", roomsInfo);
             response.addHeader("Access-Control-Allow-Origin", "*");
             response.addHeader("Access-Control-Allow-Headers", "token");
             return response;
