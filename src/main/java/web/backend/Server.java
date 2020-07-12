@@ -30,6 +30,7 @@ public class Server extends NanoHTTPD {
 
     public Server() throws IOException {
         super(80);
+        //makeSecure(NanoHTTPD.makeSSLSocketFactory("/tfe_tools.jks", "".toCharArray()), null);
         start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         System.out.println("Running!");
     }
