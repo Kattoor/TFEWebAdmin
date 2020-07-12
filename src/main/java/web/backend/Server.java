@@ -1,6 +1,8 @@
 package web.backend;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoHTTPD;
 import server.ServerImpl;
 import server.models.CreateAdmin;
@@ -255,7 +257,22 @@ public class Server extends NanoHTTPD {
                 if (successfullyConnected) {
                     System.out.println(" > Successfully connected");
                     System.out.println(" > Fetching room info");
-                    roomsInfo = si.getRoomsInfo();
+
+                    String jsonRoomsInfo = si.getRoomsInfo();
+
+                    JsonObject obj = new Gson().fromJson(jsonRoomsInfo, JsonObject.class);
+                    JsonArray rooms = obj.getAsJsonArray("rooms");
+                    rooms.forEach(room -> {
+                        JsonObject roomObj = room.getAsJsonObject();
+                        String dsc = roomObj.get("dsc").getAsString();
+                        if (dsc.startsWith("192.168.")) {
+                            roomObj.remove("dsc");
+                            roomObj.addProperty("dsc", creds.getIp());
+                        }
+                    });
+
+                    roomsInfo = new Gson().toJson(obj);
+
                     System.out.println(" > Fetched room info");
                     System.out.println(roomsInfo);
                 } else {
@@ -264,6 +281,7 @@ public class Server extends NanoHTTPD {
                 si.closeConnection();
             } else
                 System.out.println("No user found for token");
+
 
             Response response = newFixedLengthResponse(Response.Status.OK, "application/json", roomsInfo);
             response.addHeader("Access-Control-Allow-Origin", "*");
