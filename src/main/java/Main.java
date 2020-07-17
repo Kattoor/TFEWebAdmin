@@ -1,3 +1,7 @@
+import util.Config;
+import util.PrintUtil;
+import web.backend.HttpToHttpsRedirectionServer;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,10 +23,16 @@ public class Main {
                 .scheduleAtFixedRate(Main::persistPlayerCount,
                         0, 1, TimeUnit.MINUTES);
 
+        if (!Config.getEnvironment().equals("dev"))
+            Executors.newFixedThreadPool(1)
+                    .submit(HttpToHttpsRedirectionServer::new);
+
         new web.backend.Server();
     }
 
     private static void persistPlayerCount() {
+        System.out.println(PrintUtil.getTime() + " Fetching player count from Steam");
+
         final Path path = Paths.get("./playercount");
 
         HttpClient httpClient = HttpClient.newHttpClient();
@@ -33,6 +43,8 @@ public class Main {
         try {
             String body = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
             String playerCount = body.split("player_count\":")[1].split(",")[0];
+
+            System.out.println(PrintUtil.getTime() + "  > player count: " + playerCount);
 
             Files.write(path,
                     Collections.singletonList(System.currentTimeMillis() + ";" + playerCount),

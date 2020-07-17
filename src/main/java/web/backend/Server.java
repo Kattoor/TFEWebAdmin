@@ -7,6 +7,8 @@ import fi.iki.elonen.NanoHTTPD;
 import server.ServerImpl;
 import server.models.CreateAdmin;
 import server.models.CreateRoom;
+import util.Config;
+import util.PrintUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,10 +31,12 @@ public class Server extends NanoHTTPD {
     private final Map<String, ServerCredentials> authentication = new HashMap<>();
 
     public Server() throws IOException {
-        super(80);
-        //makeSecure(NanoHTTPD.makeSSLSocketFactory("/tfe_tools.jks", "".toCharArray()), null);
+        super(Config.getEnvironment().equals("dev") ? 80 : 443);
+        if (!Config.getEnvironment().equals("dev"))
+            makeSecure(NanoHTTPD.makeSSLSocketFactory("/server.keystore", Config.getKeystorePassword().toCharArray()), null);
+
         start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        System.out.println("Running!");
+        System.out.println(PrintUtil.getTime() + " Started https server");
     }
 
     @Override
@@ -40,7 +44,7 @@ public class Server extends NanoHTTPD {
         String msg = "";
         Map<String, String> parameters = session.getParms();
 
-        System.out.println("Requested URL: " + session.getUri());
+        System.out.println(PrintUtil.getTime() + " Requested URL: " + session.getUri());
 
         Response response = route(session, parameters);
         if (response != null)
@@ -63,7 +67,7 @@ public class Server extends NanoHTTPD {
                 if (Files.exists(path))
                     msg += Files.readString(path);
                 else
-                    System.out.println("Couldn't find " + session.getUri());
+                    System.out.println(PrintUtil.getTime() + " Couldn't find " + session.getUri());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,6 +81,35 @@ public class Server extends NanoHTTPD {
         else if (session.getUri().endsWith(".css"))
             mimeType = "text/css";
         return newFixedLengthResponse(Response.Status.OK, mimeType, msg);
+    }
+
+    private Map<String, String> countryCodeByIpCache = new HashMap<>();
+
+    private String getCountryCode(String dsc) {
+        if (countryCodeByIpCache.containsKey(dsc)) {
+            return countryCodeByIpCache.get(dsc);
+        } else {
+            HttpClient httpClient = HttpClient.newHttpClient();
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://api.ipstack.com/" + dsc + "?access_key=9f2cd4b65495db303986542ba61bf5b5"))
+                    .build();
+
+            try {
+                String body = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
+                JsonObject jsonObject = new Gson().fromJson(body, JsonObject.class);
+
+                String countryCode = jsonObject.get("country_code").getAsString();
+
+                System.out.println(PrintUtil.getTime() + " Fetched country code [" + countryCode + "] for ip [" + dsc + "]");
+
+                countryCodeByIpCache.put(dsc, countryCode);
+                return countryCode;
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+                return "";
+            }
+        }
     }
 
     private Response route(IHTTPSession session, Map<String, String> parameters) {
@@ -101,7 +134,7 @@ public class Server extends NanoHTTPD {
             String ip = parameters.get("ip");
             String username = parameters.get("username");
             String password = parameters.get("password");
-            System.out.println(" > Attempting to log in with ip [" + ip + "], username[" + username + "], password [" + password + "]");
+            System.out.println(PrintUtil.getTime() + "  > Attempting to log in with ip [" + ip + "], username[" + username + "], password [" + password + "]");
 
             ServerImpl si = new ServerImpl();
             boolean success = si.connect(ip, port, username, password);
@@ -110,13 +143,13 @@ public class Server extends NanoHTTPD {
             Response response;
 
             if (success) {
-                System.out.println(" > Successfully logged in");
+                System.out.println(PrintUtil.getTime() + "  > Successfully logged in");
                 String token = generateAuthenticationKey();
                 authentication.put(token, new ServerCredentials(ip, username, password));
                 response = newFixedLengthResponse(Response.Status.OK, "text", token);
                 response.addHeader("Access-Control-Allow-Headers", "token");
             } else {
-                System.out.println(" > Failed to log in");
+                System.out.println(PrintUtil.getTime() + "  > Failed to log in");
                 response = newFixedLengthResponse(Response.Status.OK, "text", "false");
             }
 
@@ -205,7 +238,7 @@ public class Server extends NanoHTTPD {
                 String roomId = parameters.get("roomId");
                 String playerId = parameters.get("playerId");
 
-                System.out.println("Removing player [" + playerId + "] from blacklist for room [" + roomId + "]");
+                System.out.println(PrintUtil.getTime() + " Removing player [" + playerId + "] from blacklist for room [" + roomId + "]");
 
                 ServerImpl si = new ServerImpl();
                 si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
@@ -226,7 +259,7 @@ public class Server extends NanoHTTPD {
             if (creds != null) {
                 String playerId = parameters.get("playerId");
 
-                System.out.println("Kicking player " + playerId);
+                System.out.println(PrintUtil.getTime() + " Kicking player " + playerId);
 
                 ServerImpl si = new ServerImpl();
                 si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
@@ -240,24 +273,24 @@ public class Server extends NanoHTTPD {
             return response;
         }
 
-        if (session.getUri().contains("/api/getrooms")) {
+        if (session.getUri().equals("/api/getrooms")) {
             String roomsInfo = "{}";
 
             String token = session.getHeaders().get("token");
-            System.out.println(" > Attempting to fetch rooms for token [" + token + "]");
+            System.out.println(PrintUtil.getTime() + "  > Attempting to fetch rooms for token [" + token + "]");
 
             ServerCredentials creds = token != null ? authentication.get(token) : null;
 
             if (creds != null) {
-                System.out.println(" > Token resolves to user [" + creds.getUsername() + "]");
+                System.out.println(PrintUtil.getTime() + "  > Token resolves to user [" + creds.getUsername() + "]");
 
                 ServerImpl si = new ServerImpl();
 
-                System.out.println(" > Connecting to server");
+                System.out.println(PrintUtil.getTime() + "  > Connecting to server");
                 boolean successfullyConnected = si.connect(creds.getIp(), port, creds.getUsername(), creds.getPassword());
                 if (successfullyConnected) {
-                    System.out.println(" > Successfully connected");
-                    System.out.println(" > Fetching room info");
+                    System.out.println(PrintUtil.getTime() + "  > Successfully connected");
+                    System.out.println(PrintUtil.getTime() + "  > Fetching room info");
 
                     String jsonRoomsInfo = si.getRoomsInfo();
 
@@ -274,17 +307,80 @@ public class Server extends NanoHTTPD {
 
                     roomsInfo = new Gson().toJson(obj);
 
-                    System.out.println(" > Fetched room info");
-                    System.out.println(roomsInfo);
+                    System.out.println(PrintUtil.getTime() + "  > Fetched room info");
+                    //System.out.println(roomsInfo);
                 } else {
-                    System.out.println(" > Failed to connect");
+                    System.out.println(PrintUtil.getTime() + "  > Failed to connect");
                 }
                 si.closeConnection();
             } else
-                System.out.println("No user found for token");
+                System.out.println(PrintUtil.getTime() + " No user found for token");
 
 
             Response response = newFixedLengthResponse(Response.Status.OK, "application/json", roomsInfo);
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Headers", "token");
+            return response;
+        }
+
+
+        if (session.getUri().contains("/api/getroomsforserverlist")) {
+            StringBuilder roomsInfo = new StringBuilder("[");
+
+            System.out.println(PrintUtil.getTime() + "  > Attempting to fetch all rooms for serverlist");
+            System.out.println(PrintUtil.getTime() + "  > Fetching Discord credentials");
+
+            final Path path = Paths.get("discord-credentials");
+            if (Files.exists(path)) {
+                try {
+                    List<String> discordCredentials = Files.readAllLines(path);
+
+                    System.out.println(PrintUtil.getTime() + "  > Fetching data from each server (" + discordCredentials.size() + " servers)");
+
+                    for (int i = 0; i < discordCredentials.size(); i++) {
+                        String username = discordCredentials.get(i).split(";")[0];
+                        String password = discordCredentials.get(i).split(";")[1];
+                        String ip = discordCredentials.get(i).split(";")[2];
+
+                        ServerImpl si = new ServerImpl();
+
+                        boolean successfullyConnected = si.connect(ip, port, username, password);
+
+                        if (successfullyConnected) {
+                            System.out.println(PrintUtil.getTime() + "  > Fetching data from server " + ip);
+
+                            String jsonRoomsInfo = si.getRoomsInfo();
+
+                            JsonObject obj = new Gson().fromJson(jsonRoomsInfo, JsonObject.class);
+                            JsonArray rooms = obj.getAsJsonArray("rooms");
+                            rooms.forEach(room -> {
+                                JsonObject roomObj = room.getAsJsonObject();
+                                String dsc = roomObj.get("dsc").getAsString();
+                                if (dsc.startsWith("192.168.")) {
+                                    roomObj.remove("dsc");
+                                    roomObj.addProperty("dsc", ip);
+                                }
+                                roomObj.addProperty("cc", getCountryCode(ip));
+                            });
+
+                            roomsInfo.append(new Gson().toJson(obj));
+
+                            if (i != discordCredentials.size() - 1)
+                                roomsInfo.append(",");
+
+                        } else {
+                            System.out.println(PrintUtil.getTime() + "  > Failed to connect to server " + ip);
+                        }
+                        si.closeConnection();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            roomsInfo.append("]");
+
+            Response response = newFixedLengthResponse(Response.Status.OK, "application/json", roomsInfo.toString());
             response.addHeader("Access-Control-Allow-Origin", "*");
             response.addHeader("Access-Control-Allow-Headers", "token");
             return response;

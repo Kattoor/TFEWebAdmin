@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import server.models.CreateAdmin;
 import server.models.CreateRoom;
+import util.PrintUtil;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class ServerImpl implements Server {
             }
         }
 
-        System.out.println(" > > > receive packet called");
+        System.out.println(PrintUtil.getTime() + "  > > > receive packet called");
         byte[] buffer = new byte[1024*10];
         BufferedInputStream is = new BufferedInputStream(socket.getInputStream());
         int bytesRead;
@@ -56,14 +57,11 @@ public class ServerImpl implements Server {
         }
         
         String json = result.split(Packet.endDataString)[0];
-        System.out.println(json);
         
         if (json.length() + 5 != result.length()) {
-            byte[] b = new byte[result.length() - (json.length() + 5)];
-            System.arraycopy(buffer, json.length() + 5, b, 0, b.length);
-            System.out.println("JASPER REST: ");
-            System.out.println(new String(b, StandardCharsets.US_ASCII));
-            return new Resultt(new Packet(json.getBytes(StandardCharsets.US_ASCII)), b);
+            byte[] rest = new byte[result.length() - (json.length() + 5)];
+            System.arraycopy(buffer, json.length() + 5, rest, 0, rest.length);
+            return new Resultt(new Packet(json.getBytes(StandardCharsets.US_ASCII)), rest);
         } else {
             return new Resultt(new Packet(json.getBytes(StandardCharsets.US_ASCII)), new byte[] {});   
         }
@@ -71,26 +69,30 @@ public class ServerImpl implements Server {
 
     @Override
     public boolean connect(String ip, int port, String username, String password) {
-        System.out.println(" > > connecting");
+        System.out.println(PrintUtil.getTime() + "  > > connecting");
         try {
             this.socket = new Socket(ip, port);
-            System.out.println(" > > socket ok ; " + ip);
-            receivePacket(new byte[] {});
-            System.out.println(" > > received packet ; " + ip);
+            System.out.println(PrintUtil.getTime() + "  > > socket ok ; " + ip);
+
+            Resultt resultt = receivePacket(new byte[] {});
+            System.out.println(PrintUtil.getTime() + "  > > received pre-login packet ; " + ip + " ; with remaining bytes length: " + resultt.previouslyRead.length);
+
             Packet logInPacket = new Packet(0, "{\"secret\": \"4bf3fd6a0c4f4ac570903654c28fb2bb\",\"userName\": \"" + username + "\", \"password\":\"" + password + "\"}");
             logInPacket.send(socket);
-            System.out.println(" > > sent packet ; " + ip);
-            Resultt resultt = receivePacket(new byte[] {});
-            System.out.println(" > > received packet ; " + ip);
+            System.out.println(PrintUtil.getTime() + "  > > sent packet ; " + ip);
+
+            resultt = receivePacket(resultt.previouslyRead);
+            System.out.println(PrintUtil.getTime() + "  > > received post-login packet 1 ; " + ip + " ; with remaining bytes length: " + resultt.previouslyRead.length);
+
             try {
-                //System.out.println("JASPER JASPER JASPER JASPER " + new S);
                 receivePacket(resultt.previouslyRead);
-                System.out.println(" > > received packet ; " + ip);
+                System.out.println(PrintUtil.getTime() + "  > > received post-login packet 2 ; " + ip + " ; with remaining bytes length: " + resultt.previouslyRead.length);
             } catch (RuntimeException e) {
-                System.out.println("Only received one packet after sending log in packet ; " + ip);
+                System.out.println(PrintUtil.getTime() + " Only received one packet after sending log in packet ; " + ip);
             }
             return true;
         } catch (Exception e) {
+            System.out.println(PrintUtil.getTime() + "  ? ? some error happened whilst connecting .. probably a newer server version");
             e.printStackTrace();
             return false;
         }

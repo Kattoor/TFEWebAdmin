@@ -3,3 +3,8 @@
 target
 dist/
 node_modules/
+app.secret.toml
+server.keystore
+discord-credentials
+playercount
+package-lock.json

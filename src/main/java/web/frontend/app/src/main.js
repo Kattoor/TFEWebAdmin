@@ -11,7 +11,8 @@ Vue.mixin({
         return {
             get serverIp() {
                 //return 'http://161.35.95.41';
-                return 'http://localhost:80';
+                return 'https://tfe.tools';
+                //return 'http://localhost';
             }
         }
     }
