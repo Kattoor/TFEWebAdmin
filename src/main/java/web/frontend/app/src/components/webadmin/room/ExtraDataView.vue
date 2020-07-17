@@ -1,7 +1,5 @@
 <template>
-    <div class="roww">
-        <h1 class="md-title">Extra Data</h1>
-
+    <div>
         <div class="room-data-wrapper">
             <p>RoomID: {{ selected.roomID}}</p>
             <p>SessionType: {{ selected.sessionType }}</p>
@@ -32,7 +30,7 @@
 
 <script>
     export default {
-        name: "ExtaDataView",
+        name: "ExtraDataView",
         props: ['selected']
     }
 </script>

@@ -156,7 +156,7 @@
                         <p>Amount of Bots: <b>{{newRoom.numOfBots}}</b></p>
                         <p>Amount of Maps: <b>{{newRoom.map.include.length}}</b></p>
                         <p>Start Map: <b>{{newRoom.map.start}}</b></p>
-                        <v-btn color="primary" @click="createRoom()">Create Room</v-btn>
+                        <v-btn color="primary" @click="createRoom()">Create</v-btn>
                     </div>
 
                     <v-btn text @click="cancel()">Cancel</v-btn>

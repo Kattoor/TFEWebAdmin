@@ -35,7 +35,8 @@
                                         <div style="display: flex; flex-direction: row; padding: 15px;">
                                             <div style="height: 100%; width: 100%; color: black;">
                                                 <span style="font-weight: bold; margin-bottom: 15px; display: inline-block">Task Force Elite: {{items[selectedRow].blueTeam.length}}</span>
-                                                <div v-for="player in items[selectedRow].blueTeam" :key="player.displayName">
+                                                <div v-for="player in items[selectedRow].blueTeam"
+                                                     :key="player.displayName">
                                                     <div style="display: flex; align-items: center; height: 36px;">
                                                         <p style="margin: 0 5px;">{{player.displayName}}</p>
                                                     </div>
@@ -43,7 +44,8 @@
                                             </div>
                                             <div style="height: 100%; width: 100%; color: black;">
                                                 <span style="font-weight: bold; margin-bottom: 15px; display: inline-block">Red Spear: {{items[selectedRow].redTeam.length}}</span>
-                                                <div v-for="player in items[selectedRow].redTeam" :key="player.displayName">
+                                                <div v-for="player in items[selectedRow].redTeam"
+                                                     :key="player.displayName">
                                                     <div style="display: flex; align-items: center; height: 36px;">
                                                         <p style="margin: 0 5px;">{{player.displayName}}</p>
                                                     </div>
@@ -58,29 +60,14 @@
                     </v-data-table>
                 </v-card-text>
             </v-card>
-
-            <line-chart :chart-data="chartData"></line-chart>
         </div>
     </div>
 </template>
 
 <script>
-    import LineChart from '../webadmin/LineChart'
-
     export default {
         name: "ServerListView",
-        components: {LineChart},
         created() {
-            fetch(this.serverIp + '/api/getplayercounts', {
-                headers: {"token": localStorage.token}
-            })
-                .then(data => data.json())
-                .then(data => {
-                    const obj = {};
-                    data.forEach(record => obj[record.time] = record.count);
-                    this.chartData = obj;
-                });
-
             this.load();
         },
         data() {
@@ -95,23 +82,7 @@
                     {text: 'Active Map', value: 'map'},
                     {text: '# players', value: 'playercount'}
                 ],
-                rooms: [],
-
-                chartData: {
-                    '2018-05-13': 640,
-                    '2018-05-14': 200,
-                    '2018-05-15': 250,
-                    '2018-05-16': 350,
-                    '2018-05-17': 200,
-                    '2018-05-18': 670,
-                    '2018-05-19': 600,
-                    '2018-05-20': 800
-                },
-                chartOptions: {},
-                myStyles: {
-                    height: `250px`,
-                    position: 'relative'
-                }
+                rooms: []
             };
         },
         methods: {

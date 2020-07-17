@@ -36,7 +36,7 @@ window.router = router;
 import vuetify from './plugins/vuetify';
 import ServerListView from "./components/serverlist/ServerListView";
 import WebAdminView from "./components/webadmin/WebAdminView";
-import AccountSettingsView from "./components/webadmin/AccountSettingsView";
+import AccountSettingsView from "./components/webadmin/account/AccountSettingsView";
 
 new Vue({
     router,
