@@ -1,17 +1,14 @@
 <template>
-    <v-card width="60%" class="mx-auto mt-5">
-        <v-card-title class="pb-0">
-            <div class="overline mb-4">Blacklist</div>
-        </v-card-title>
+    <div>
         <v-card-text>
             <BlackListView :roomId="roomId" :blackList="blacklist"
                            @removedFromBlackList="playerId => $emit('removeFromBlacklist', playerId)"/>
         </v-card-text>
-    </v-card>
+    </div>
 </template>
 
 <script>
-    import BlackListView from "./BlackListView";
+    import BlackListView from "../BlackListView";
 
     export default {
         name: "RoomBlacklistCard",

@@ -24,7 +24,7 @@
 
         <div class="background"/>
         <v-main>
-            <v-breadcrumbs :items="breadCrumbs">
+<!--            <v-breadcrumbs :items="breadCrumbs">
                 <template v-slot:item="{ item }">
                     <router-link :to="item.href" tag="div">
                         <v-breadcrumbs-item :href="item.href" :disabled="item.disabled">
@@ -35,7 +35,7 @@
                 <template v-slot:divider>
                     <v-icon>mdi-chevron-right</v-icon>
                 </template>
-            </v-breadcrumbs>
+            </v-breadcrumbs>-->
             <router-view/>
         </v-main>
     </v-app>
@@ -137,6 +137,6 @@
     }
 
     .bb {
-        border-right: 5px solid #116aff;
+        border-right: 5px solid #2196F3;
     }
 </style>

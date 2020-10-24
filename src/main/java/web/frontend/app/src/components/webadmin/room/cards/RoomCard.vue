@@ -18,13 +18,23 @@
                         disable-sort>
                     <template v-slot:body="{ items }">
                         <tbody>
-                        <tr v-for="(item, key) in items"
-                            :class="key === selectedRow ? 'blue white-text' : ''"
+                        <tr v-for="(item, key) in (selectedRow !== null ? insertIntoArray(items, selectedRow + 1, {expandedSection: true}) : items)"
+                            :class="getClass(item, key)"
                             :key="item.name"
-                            @click="setSelectedRow(key)">
-                            <td>{{ item.roomName }}</td>
-                            <td>{{ item.gameMode }}</td>
-                            <td>{{ item.map }}</td>
+                            @click="!item.expandedSection && setSelectedRow(selectedRow === null || key <= selectedRow ? key : key - 1)">
+                            <template v-if="!item.expandedSection">
+                                <td>{{ item.roomName }}</td>
+                                <td>{{ item.gameMode }}</td>
+                                <td>{{ item.map }}</td>
+                                <td>{{item.blueTeam.length + item.redTeam.length}}</td>
+                            </template>
+                            <template v-else>
+                                <td v-if="someRoomIsSelected" :colspan="headers.length"
+                                    style="padding-left: 20px; padding-right: 20px; background-color: #F5F5F6">
+                                    <RoomPlayersCard :blue-team="selected.blueTeam"
+                                                     :red-team="selected.redTeam"></RoomPlayersCard>
+                                </td>
+                            </template>
                         </tr>
                         </tbody>
                     </template>
@@ -37,6 +47,10 @@
                     </v-btn>
 
                     <div v-if="someRoomIsSelected">
+                        <v-btn class="ma-2" tile text color="red" @click="manageRoom(selected)">
+                            MANAGE
+                            <v-icon style="margin-left: 2px;">mdi-cog</v-icon>
+                        </v-btn>
                         <v-btn class="ma-2" tile text color="red" @click="restartRoom(selected)">
                             RESTART
                             <v-icon style="margin-left: 2px;">mdi-backup-restore</v-icon>
@@ -47,37 +61,20 @@
                         </v-btn>
                     </div>
                 </div>
-
             </v-card-text>
         </v-card>
-
-        <template v-if="someRoomIsSelected">
-
-            <RoomPlayersCard :blue-team="selected.blueTeam"
-                             :red-team="selected.redTeam"></RoomPlayersCard>
-
-            <RoomBlacklistCard :room-id="selected.roomID"
-                               :blacklist="selected.blackList"
-                               @removeFromBlacklist="playerId => selected.blackList = selected.blackList.filter(p => p.pid !== playerId)"></RoomBlacklistCard>
-
-            <RoomMapCard :room-id="selected.roomID" :dsc="selected.dsc"
-                         :map="selected.map" :map-rotation="selected.mapRotation"></RoomMapCard>
-
-            <RoomExtraDataCard :selected="selected"></RoomExtraDataCard>
-
-        </template>
     </div>
 </template>
 
 <script>
     import RoomPlayersCard from "./RoomPlayersCard";
-    import RoomBlacklistCard from "./RoomBlacklistCard";
+    /*import RoomBlacklistCard from "./RoomBlacklistCard";
     import RoomMapCard from "./RoomMapCard";
-    import RoomExtraDataCard from "./RoomExtraDataCard";
+    import RoomExtraDataCard from "./RoomExtraDataCard";*/
 
     export default {
         name: "RoomCard",
-        components: {RoomExtraDataCard, RoomMapCard, RoomBlacklistCard, RoomPlayersCard},
+        components: {/*RoomExtraDataCard, RoomMapCard, RoomBlacklistCard, */RoomPlayersCard},
         created() {
             this.load();
         },
@@ -88,6 +85,7 @@
                     {text: 'Name', value: 'roomName'},
                     {text: 'Game Mode', value: 'gameMode'},
                     {text: 'Active Map', value: 'map'},
+                    {text: '# players', value: 'playercount'}
                 ],
                 rooms: [],
                 selectedRow: null,
@@ -138,18 +136,42 @@
                     .then(() => {
                         this.load();
                     });
+            },
+            manageRoom(item) {
+                this.$emit('showRoomDetails', item);
+            },
+            insertIntoArray(arr, index, newItem) {
+                return [...arr.slice(0, index), newItem, ...arr.slice(index)];
+            },
+            getClass(item, key) {
+                let classList = '';
+                if (this.selectedRow !== null && key === this.selectedRow)
+                    classList += 'primary-background white-text';
+                if (!item.expandedSection)
+                    classList += ' pointer-on-hover';
+                if (item.expandedSection)
+                    classList += ' expanded-section';
+                return classList;
             }
         }
     }
 </script>
 
 <style lang="scss" scoped>
+    .primary-background {
+        background-color: #2196f3 !important;
+    }
+
     .white-text {
         color: white;
         font-weight: bold;
     }
 
-    tr :hover {
+    .pointer-on-hover :hover {
         cursor: pointer;
+    }
+
+    .expanded-section :hover {
+        background: #F5F5F6;
     }
 </style>
